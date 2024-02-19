@@ -14,6 +14,9 @@ import render
 app = Flask(__name__)
 dotenv.load_dotenv()
 
+
+DISCORD_WEBHOOK = os.getenv('DISCORD_WEBHOOK')
+
 # If votes file doesn't exist, create it
 if not os.path.isfile('data/votes.json'):
     with open('data/votes.json', 'w') as file:
@@ -121,9 +124,6 @@ def save_vote(data):
         json.dump(votes, file, indent=4)
 
 def send_discord_message(data):
-    # Define the webhook URL
-    webhook_url = 'https://discord.com/api/webhooks/1208977249232228362/jPtFZKD7MWzaRbiHwc9rgEOQx-d8DWSDyr7oVMzfoC5QUayts8BF1oi1xxoE8O6ouTFi'
-
     text = f"New vote for `{data['message']}`"
 
     tokens = data['votes']
@@ -167,7 +167,7 @@ def send_discord_message(data):
     }
 
     # Send the message as a POST request to the webhook URL
-    response = requests.post(webhook_url, data=json.dumps(message), headers={'Content-Type': 'application/json'})
+    response = requests.post(DISCORD_WEBHOOK, data=json.dumps(message), headers={'Content-Type': 'application/json'})
 
     # Print the response from the webhook (for debugging purposes)
     print(response.text)
