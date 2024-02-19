@@ -62,7 +62,7 @@ def catch_all(path):
     if os.path.isfile('templates/' + path + '.html'):
         return render_template(path + '.html', year=year)
 
-    return redirect('/')
+    return render_template('404.html', year=year), 404
 
 @app.route('/vote')
 def vote():
@@ -177,7 +177,7 @@ def send_discord_message(data):
 # 404 catch all
 @app.errorhandler(404)
 def not_found(e):
-    return redirect('/')
+    return render_template('404.html', year=datetime.datetime.now().year), 404
 
 
 if __name__ == '__main__':
