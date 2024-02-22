@@ -14,7 +14,7 @@ import render
 app = Flask(__name__)
 dotenv.load_dotenv()
 
-
+CURRENT_VOTE = os.getenv('CURRENT_VOTE')
 DISCORD_WEBHOOK = os.getenv('DISCORD_WEBHOOK')
 
 # If votes file doesn't exist, create it
@@ -52,7 +52,7 @@ def faviconPNG():
 def index():
     year = datetime.datetime.now().year
     votes = render.votes()
-    return render_template('index.html',year=year,votes=votes)
+    return render_template('index.html',year=year,votes=votes, current_vote=CURRENT_VOTE)
 
 @app.route('/<path:path>')
 def catch_all(path):
