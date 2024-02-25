@@ -13,7 +13,7 @@ def votes():
         # Check if message is json
         if 'votes' not in vote:
             continue
-        weight = int(vote["votes"])
+        weight = int(vote["votes"]) / 100
         if vote["message"].startswith("{"):
             message = json.loads(vote["message"])
             for key in message:
@@ -23,9 +23,9 @@ def votes():
                     options[key] = (int(message[key]) * weight)
             continue
         if vote["message"] in options:
-            options[vote["message"]] += weight
+            options[vote["message"]] += weight * 100
         else:
-            options[vote["message"]] = weight
+            options[vote["message"]] = weight * 100
 
     
     labels = list(options.keys())
