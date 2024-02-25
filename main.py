@@ -15,6 +15,8 @@ app = Flask(__name__)
 dotenv.load_dotenv()
 
 CURRENT_VOTE = os.getenv('CURRENT_VOTE')
+OPTIONS = os.getenv('OPTIONS')
+OPTIONS = json.loads(OPTIONS)
 DISCORD_WEBHOOK = os.getenv('DISCORD_WEBHOOK')
 
 # If votes file doesn't exist, create it
@@ -52,7 +54,9 @@ def faviconPNG():
 def index():
     year = datetime.datetime.now().year
     votes = render.votes()
-    return render_template('index.html',year=year,votes=votes, current_vote=CURRENT_VOTE)
+    options = render.options(OPTIONS)
+
+    return render_template('index.html',year=year,votes=votes, current_vote=CURRENT_VOTE, options=options)
 
 @app.route('/<path:path>')
 def catch_all(path):
@@ -167,10 +171,8 @@ def send_discord_message(data):
     }
 
     # Send the message as a POST request to the webhook URL
-    response = requests.post(DISCORD_WEBHOOK, data=json.dumps(message), headers={'Content-Type': 'application/json'})
-
-    # Print the response from the webhook (for debugging purposes)
-    print(response.text)
+    if DISCORD_WEBHOOK is not None:
+        requests.post(DISCORD_WEBHOOK, data=json.dumps(message), headers={'Content-Type': 'application/json'})
 
     
 

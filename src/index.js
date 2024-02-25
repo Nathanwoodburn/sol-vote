@@ -97,13 +97,35 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     document.getElementById('signMessageForm').addEventListener('submit', async function(event) {
         event.preventDefault();
-        const vote = document.getElementById('vote').value.trim(); // Get the value of the vote input field
+        // Get all inputs in #advancedOptions
+        const inputs = document.querySelectorAll('#advancedOptions input');
+
+        // Store values in json with matching names
+        const options = {};
+        inputs.forEach(input => {
+            options[input.name] = input.value;
+        }
+        );
         
-        // Ensure the vote is not empty
-        if (!vote) {
-            alert('Please enter your vote.');
+        console.log(options);
+        // Make sure the votes total 100
+        let total = 0;
+        for (const key in options) {
+            if (options.hasOwnProperty(key)) {
+                const element = options[key];
+                total += parseInt(element);
+                // If value less than 0 or greater than 100, alert and return
+                if (element < 0 || element > 100) {
+                    alert('Votes must be between 0 and 100');
+                    return;
+                }
+            }
+        }
+        if (total !== 100) {
+            alert('Votes must total 100');
             return;
         }
+        const vote = JSON.stringify(options);
 
         // Encode the message as a buffer-like object
         const messageUint8Array = new TextEncoder().encode(vote);
