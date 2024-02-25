@@ -174,7 +174,12 @@ def send_discord_message(data):
     if DISCORD_WEBHOOK is not None:
         requests.post(DISCORD_WEBHOOK, data=json.dumps(message), headers={'Content-Type': 'application/json'})
 
-    
+@app.route('/votes')
+def download():
+    resp = make_response(send_from_directory('data', 'votes.json'))
+    # Set as json
+    resp.headers['Content-Type'] = 'application/json'
+    return resp
 
 # 404 catch all
 @app.errorhandler(404)
