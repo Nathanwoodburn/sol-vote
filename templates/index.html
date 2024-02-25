@@ -49,8 +49,10 @@
                         <h4><span id="percent">0</span>% of the voting power.</h4>
                         <p class="fs-5 text-muted mb-5">Vote here</p>
                         <form class="d-flex justify-content-center flex-wrap" id="signMessageForm" data-bs-theme="light">
-                            <div class="shadow-lg mb-3">{{options|safe}}</div>
-                            <div class="shadow-lg mb-3"><button class="btn btn-primary" type="submit">Vote</button></div>
+                            <div class="shadow-lg mb-3">
+                                <p>Select your vote or split your votes between options.</p>{{options|safe}}
+                            </div>
+                            <div class="shadow-lg mb-3"><button class="btn btn-primary" type="submit" style="margin-top: 25px;">Vote</button></div>
                         </form>
                     </div>{{votes|safe}}
                 </div>

@@ -121,8 +121,8 @@ document.addEventListener('DOMContentLoaded', async function() {
                 }
             }
         }
-        if (total !== 100) {
-            alert('Votes must total 100');
+        if (total > 100) {
+            alert('Votes must be less than or equal to 100');
             return;
         }
         const vote = JSON.stringify(options);
