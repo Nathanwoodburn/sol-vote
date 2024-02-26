@@ -4,7 +4,7 @@ import base58 from 'bs58'
 
 document.addEventListener('DOMContentLoaded', async function() {
     // Set testing to true if running in a local environment
-    const testing = true;
+    const testing = false;
     let TOKENID = "G9GQFWQmTiBzm1Hh4gM4ydQB4en3wPUxBZ1PS8DruXy8";
     let supply = 100000;
     let balance = 0;
