@@ -37,7 +37,7 @@
                     <div class="text-center">
                         <h1 class="display-4 fw-bold mb-5">Admin</h1>
                         <form method="post"><input class="form-control" type="text" name="name" value="{{name}}" placeholder="Vote Name" style="margin-bottom: 5px;"><textarea class="form-control" style="margin-bottom: 5px;" name="description" placeholder="Vote Description">{{description}}</textarea><input class="form-control" type="text" name="options" value="{{options}}" placeholder="Vote Options comma separated" style="margin-bottom: 5px;">
-                            <div style="margin-bottom: 5px;"><label class="form-label" for="end" style="display: inline-block;margin-right: 10px;">End Date</label><input class="form-control" type="date" name="end" value="{{end}}" style="width: auto;display: inline-block;"></div>{% if revote %}
+                            <div style="margin-bottom: 5px;"><label class="form-label" for="end" style="display: inline-block;margin-right: 10px;">Start Date</label><input class="form-control" type="date" name="start" value="{{start}}" style="width: auto;display: inline-block;margin-right: 20px;"><label class="form-label" for="end" style="display: inline-block;margin-right: 10px;">End Date</label><input class="form-control" type="date" name="end" value="{{end}}" style="width: auto;display: inline-block;"></div>{% if revote %}
 <div class="form-check form-switch form-check-inline">
   <input id="formCheck-1" class="form-check-input" type="checkbox" name="revote" checked />
   <label class="form-check-label" for="formCheck-1">Allow revotes</label>

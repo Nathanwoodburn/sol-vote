@@ -53,9 +53,46 @@
         <div class="container">
             <div class="row">
                 <div class="col-md-6 text-center">
-                    <h2 style="margin-bottom: 20px;">{{current_vote}}</h2>
+                    <h2>{{current_vote}}</h2>{% if ended %}
+<h3 style="margin-bottom: 0px;">Voting has closed<span id="timer"></span>&nbsp;</h3>
+{% elif notStarted %}
+<h3 style="margin-bottom: 0px;">Opens on {{starts}} <span id="timer"></span>&nbsp;</h3>
+{% else %}
+<h3 style="margin-bottom: 0px;">Closes in <span id="timer"></span>&nbsp;</h3>
+<span id="date" style="font-size: 16px;">({{smallEnd}})</span>
+<script>
+        function updateTimer() {
+            const endDate = new Date('{{unixEnd}}'); // Set the end date here
+            const now = new Date();
+            const diff = endDate - now;
+            let days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            let hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            let minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            let seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+            let timerText = '';
+            if (days > 0) {
+                timerText += `${days} day${days > 1 ? 's' : ''} `;
+            }
+            if (hours > 0 || (days === 0 && minutes === 0)) {
+                timerText += `${hours} hour${hours > 1 ? 's' : ''} `;
+            }
+            if (minutes > 0 || (days === 0 && hours < 4)) {
+                timerText += `${minutes} minute${minutes > 1 ? 's' : ''} `;
+            }
+            if (seconds > 0 && (days === 0 && hours < 4)) {
+                timerText += `${seconds} second${seconds > 1 ? 's' : ''}`;
+            }
+
+            document.getElementById('timer').innerText = timerText;
+        }
+
+        setInterval(updateTimer, 1000);
+        updateTimer(); 
+    </script>
+{% endif %}
                     <p style="margin: 0px;">{{description}}</p>
-                    <p>{{end}}<br>You are {{revote}} allowed to redo your vote.</p>{{votes|safe}}
+                    <p>You are {{revote}} allowed to redo your vote.</p>{{votes|safe}}
                 </div>
                 <div class="col-md-6 text-center">
                     <h3>You have&nbsp;<span id="balance">0</span>&nbsp;votes.</h3>

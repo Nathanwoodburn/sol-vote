@@ -18,6 +18,7 @@ dotenv.load_dotenv()
 
 
 DISCORD_WEBHOOK = os.getenv('DISCORD_WEBHOOK')
+utc_now = datetime.datetime.utcnow()
 
 # If votes file doesn't exist, create it
 if not os.path.isfile('data/votes.json'):
@@ -60,12 +61,12 @@ def index():
 
     enabled = info["enabled"]
     end = datetime.datetime.strptime(info["end"], "%Y-%m-%d")
-    if end < datetime.datetime.now():
-        enabled = False
-        end = "Voting has closed"
-        info["public"] = True
-    else:
-        end = f'Voting ends on {end.strftime("%B %d, %Y")}'
+    smallEnd = end.strftime("%Y-%m-%d")
+    # Format as 2024-02-27T00:00:00Z
+    unixEnd = end.strftime("%Y-%m-%dT00:00:00Z")
+
+    if not hasStarted() or hasEnded():
+        enabled = False    
 
     revote = "not" if not info["revote"] else ""
     if info["public"]:
@@ -74,7 +75,11 @@ def index():
         votes = ""
 
     return render_template('index.html',year=year,votes=votes, options=options,
-                           current_vote=info["vote"], description=info["description"], end=end,enabled=enabled, public=info["public"], revote=revote)
+                           current_vote=info["vote"], description=info["description"],
+                           end=end,enabled=enabled, public=info["public"],
+                           revote=revote, smallEnd=smallEnd,
+                           unixEnd=unixEnd,ended=hasEnded(),
+                           notStarted=not hasStarted(),starts=startTime().strftime("%Y-%m-%d") + " UTC")
 
 @app.route('/<path:path>')
 def catch_all(path):
@@ -117,11 +122,12 @@ def vote():
     # Make sure the voting is enabled and hasn't ended
     if not info['enabled']:
         return render_template('404.html', year=datetime.datetime.now().year)
-    
-    end = datetime.datetime.strptime(info['end'], "%Y-%m-%d")
-    if end < datetime.datetime.now():
+
+    if hasEnded():
         return render_template('404.html', year=datetime.datetime.now().year)
     
+    if not hasStarted():
+        return render_template('404.html', year=datetime.datetime.now().year)
 
     # Verify signature
     try:
@@ -298,7 +304,9 @@ def admin():
     info = get_vote_info()
     options = ','.join(info['options'])
 
-    return render_template('admin.html', year=datetime.datetime.now().year, name=info['vote'], description=info['description'], end=info['end'], enabled=info['enabled'], public=info['public'], revote=info['revote'], options=options)
+    return render_template('admin.html', year=datetime.datetime.now().year, name=info['vote'],
+                           description=info['description'], end=info['end'], start=info['start'],
+                           enabled=info['enabled'], public=info['public'], revote=info['revote'], options=options)
 
 @app.route('/admin', methods=['POST'])
 def admin_post():
@@ -314,6 +322,7 @@ def admin_post():
     info['vote'] = request.form['name']
     info['description'] = request.form['description']
     info['end'] = request.form['end']
+    info['start'] = request.form['start']
     info['enabled'] = 'enabled' in request.form
     info['public'] = 'public' in request.form
     info['revote'] = 'revote' in request.form
@@ -343,11 +352,12 @@ def clear():
 
 def get_vote_info():
     if not os.path.isfile('data/info.json'):
+        end = datetime.datetime.now() + datetime.timedelta(days=7)
+        end = end.strftime("%Y-%m-%d")
+        start = datetime.datetime.now() - datetime.timedelta(days=7)
+        start = start.strftime("%Y-%m-%d")
         with open('data/info.json', 'w') as file:
-            end = datetime.datetime.now() + datetime.timedelta(days=7)
-            end = end.strftime("%Y-%m-%d")
-
-            json.dump({'vote': '','description':'', 'end': end,'enabled': False, 'public': True, 'revote': True, 'options': []}, file)
+            json.dump({'vote': '','description':'', 'end': end,'start':start,'enabled': False, 'public': True, 'revote': True, 'options': []}, file)
     with open('data/info.json') as file:
         info = json.load(file)
     return info
@@ -357,6 +367,38 @@ def get_vote_info():
 @app.errorhandler(404)
 def not_found(e):
     return render_template('404.html', year=datetime.datetime.now().year), 404
+
+
+# Time helper functions
+def timeLeft():
+    info = get_vote_info()
+    end = utc_now.strptime(info["end"], "%Y-%m-%d")
+    left = end - utc_now
+    print(left)
+    return left
+
+def endTime():
+    info = get_vote_info()
+    end = utc_now.strptime(info["end"], "%Y-%m-%d")
+    return end
+
+def startTime():
+    info = get_vote_info()
+    start = utc_now.strptime(info["start"], "%Y-%m-%d")
+    return start
+
+def hasStarted():
+    start = startTime()
+    if utc_now > start:
+        return True
+    return False
+
+def hasEnded():
+    end = endTime()
+    if utc_now > end:
+        return True
+    return False
+
 
 
 if __name__ == '__main__':
