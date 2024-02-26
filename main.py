@@ -10,13 +10,13 @@ import nacl.encoding
 import nacl.exceptions
 import base58
 import render
+import hashlib
+import random
 
 app = Flask(__name__)
 dotenv.load_dotenv()
 
-CURRENT_VOTE = os.getenv('CURRENT_VOTE')
-OPTIONS = os.getenv('OPTIONS')
-OPTIONS = json.loads(OPTIONS)
+
 DISCORD_WEBHOOK = os.getenv('DISCORD_WEBHOOK')
 
 # If votes file doesn't exist, create it
@@ -53,10 +53,28 @@ def faviconPNG():
 @app.route('/')
 def index():
     year = datetime.datetime.now().year
-    votes = render.votes()
-    options = render.options(OPTIONS)
+    
+    
+    info = get_vote_info()
+    options = render.options(info["options"])
 
-    return render_template('index.html',year=year,votes=votes, current_vote=CURRENT_VOTE, options=options)
+    enabled = info["enabled"]
+    end = datetime.datetime.strptime(info["end"], "%Y-%m-%d")
+    if end < datetime.datetime.now():
+        enabled = False
+        end = "Voting has closed"
+        info["public"] = True
+    else:
+        end = f'Voting ends on {end.strftime("%B %d, %Y")}'
+
+    revote = "not" if not info["revote"] else ""
+    if info["public"]:
+        votes = render.votes()
+    else:
+        votes = ""
+
+    return render_template('index.html',year=year,votes=votes, options=options,
+                           current_vote=info["vote"], description=info["description"], end=end,enabled=enabled, public=info["public"], revote=revote)
 
 @app.route('/<path:path>')
 def catch_all(path):
@@ -87,6 +105,24 @@ def vote():
     public_key = data["walletAddress"]
     percent = data["percent"]
 
+    # Check if revote is enabled
+    info = get_vote_info()
+    if not info['revote']:
+        with open('data/votes.json') as file:
+            votes = json.load(file)
+        for vote in votes:
+            if vote["walletAddress"] == public_key:
+                return render_template('revotes.html', year=datetime.datetime.now().year)
+
+    # Make sure the voting is enabled and hasn't ended
+    if not info['enabled']:
+        return render_template('404.html', year=datetime.datetime.now().year)
+    
+    end = datetime.datetime.strptime(info['end'], "%Y-%m-%d")
+    if end < datetime.datetime.now():
+        return render_template('404.html', year=datetime.datetime.now().year)
+    
+
     # Verify signature
     try:
         # Decode base58 encoded strings
@@ -108,7 +144,17 @@ def vote():
     # Send message to discord
     send_discord_message(data)
     save_vote(data)
-    return render_template('success.html', year=datetime.datetime.now().year, vote=data["message"],percent=percent,signature=signature,votes=render.votes())
+
+    vote_chart = ""
+    if info['public']:
+        vote_chart = render.votes()
+    else:
+        date = datetime.datetime.strptime(info['end'], "%Y-%m-%d")
+        if date < datetime.datetime.now():
+            vote_chart = render.votes()
+        
+
+    return render_template('success.html', year=datetime.datetime.now().year, vote=data["message"],percent=percent,signature=signature,votes=vote_chart)
 
 def save_vote(data):
     # Load votes
@@ -176,10 +222,136 @@ def send_discord_message(data):
 
 @app.route('/votes')
 def download():
+    if 'walletAddress' in request.args:
+        address = request.args['walletAddress']
+        with open('data/votes.json') as file:
+            votes = json.load(file)
+        for vote in votes:
+            if vote["walletAddress"] == address:
+                return jsonify([vote])
+        return jsonify([])
+
+
+
+    info = get_vote_info()
+    if not info['public']:
+        end = datetime.datetime.strptime(info['end'], "%Y-%m-%d")
+        if end > datetime.datetime.now():
+            return render_template('blocked.html', year=datetime.datetime.now().year), 404
+
+
     resp = make_response(send_from_directory('data', 'votes.json'))
     # Set as json
     resp.headers['Content-Type'] = 'application/json'
     return resp
+
+
+#region admin
+@app.route('/login', methods=['POST'])
+def login():
+    # If account.json doesn't exist, create it
+    if not os.path.isfile('data/account.json'):
+    
+        user = request.form['email']
+        # Hash password
+        password = request.form['password']
+        hashed = hashlib.sha256(password.encode()).hexdigest()
+        token = random.randint(100000, 999999)
+        with open('data/account.json', 'w') as file:
+            json.dump({'email': user, 'password': hashed, 'token': token}, file)
+        resp = make_response(redirect('/admin'))
+        resp.set_cookie('token', str(token))
+        return resp            
+
+    
+    # Read account.json
+    with open('data/account.json') as file:
+        account = json.load(file)
+
+    
+
+    user = request.form['email']
+    # Hash password
+    password = request.form['password']
+    hashed = hashlib.sha256(password.encode()).hexdigest()
+    
+    if user == account['email'] and hashed == account['password']:
+        token = random.randint(100000, 999999)
+        account['token'] = token
+        with open('data/account.json', 'w') as file:
+            json.dump(account, file)
+        resp = make_response(redirect('/admin'))
+        resp.set_cookie('token', str(token))
+        return resp
+    
+    return redirect('/')
+
+@app.route('/admin')
+def admin():
+    if not 'token' in request.cookies:
+        return redirect('/login')
+    with open('data/account.json') as file:
+        account = json.load(file)
+    if request.cookies['token'] != str(account['token']):
+        return redirect('/login')
+    
+    info = get_vote_info()
+    options = ','.join(info['options'])
+
+    return render_template('admin.html', year=datetime.datetime.now().year, name=info['vote'], description=info['description'], end=info['end'], enabled=info['enabled'], public=info['public'], revote=info['revote'], options=options)
+
+@app.route('/admin', methods=['POST'])
+def admin_post():
+    if not 'token' in request.cookies:
+        return redirect('/login')
+    with open('data/account.json') as file:
+        account = json.load(file)
+    if request.cookies['token'] != str(account['token']):
+        return redirect('/login')
+
+    info = get_vote_info()
+
+    info['vote'] = request.form['name']
+    info['description'] = request.form['description']
+    info['end'] = request.form['end']
+    info['enabled'] = 'enabled' in request.form
+    info['public'] = 'public' in request.form
+    info['revote'] = 'revote' in request.form
+    options = request.form['options']
+    options = options.split(',')
+    info['options'] = options
+
+    with open('data/info.json', 'w') as file:
+        json.dump(info, file)
+    
+    return redirect('/admin')
+
+@app.route('/admin/clear')
+def clear():
+    if not 'token' in request.cookies:
+        return redirect('/login')
+    with open('data/account.json') as file:
+        account = json.load(file)
+    if request.cookies['token'] != str(account['token']):
+        return redirect('/login')
+    with open('data/votes.json', 'w') as file:
+        json.dump([], file)
+    return redirect('/admin')
+
+
+#endregion
+
+def get_vote_info():
+    if not os.path.isfile('data/info.json'):
+        with open('data/info.json', 'w') as file:
+            end = datetime.datetime.now() + datetime.timedelta(days=7)
+            end = end.strftime("%Y-%m-%d")
+
+            json.dump({'vote': '','description':'', 'end': end,'enabled': False, 'public': True, 'revote': True, 'options': []}, file)
+    with open('data/info.json') as file:
+        info = json.load(file)
+    return info
+
 
 # 404 catch all
 @app.errorhandler(404)

@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
-    <title>Vote | Nathan.Woodburn/</title>
+    <title>Page Not Found - Vote | Nathan.Woodburn/</title>
     <meta name="twitter:image" content="https://vote.woodburn.au/assets/img/favicon.png">
     <meta name="twitter:card" content="summary">
     <meta name="twitter:description" content="Vote on Nathan.Woodburn/ projects">
@@ -14,14 +14,6 @@
     <meta property="og:description" content="Vote on Nathan.Woodburn/ projects">
     <meta name="twitter:title" content="Vote | Nathan.Woodburn/">
     <meta property="og:image" content="https://vote.woodburn.au/assets/img/favicon.png">
-    <script type="application/ld+json">
-        {
-            "@context": "http://schema.org",
-            "@type": "WebSite",
-            "name": "Vote | Nathan.Woodburn/",
-            "url": "https://vote.woodburn.au"
-        }
-    </script>
     <link rel="apple-touch-icon" type="image/png" sizes="180x180" href="assets/img/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon-16x16.png">
     <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon-32x32.png">
@@ -38,40 +30,13 @@
     <nav class="navbar navbar-expand-md fixed-top navbar-shrink py-3 navbar-light" id="mainNav">
         <div class="container"><a class="navbar-brand d-flex align-items-center" href="/"><span>Nathan.Woodburn/</span></a><button class="navbar-toggler" data-bs-toggle="collapse"><span class="visually-hidden">Toggle navigation</span><span class="navbar-toggler-icon"></span></button></div>
     </nav>
-    <header class="pt-5">
-        <div class="container pt-4 pt-xl-5">
-            <div class="row pt-5">
-                <div class="col-md-8 text-center text-md-start mx-auto">
-                    <div class="text-center">
-                        <h1 class="display-4 fw-bold mb-5">Vote on projects from<br><a class="no-a-display" href="https://nathan.woodburn.au" target="_blank"><span class="underline">Nathan.Woodburn/</span></a></h1>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </header>
-    <section>
+    <section class="py-5 mt-5">
         <div class="container">
-            <div class="row">
-                <div class="col-md-6 text-center">
-                    <h2 style="margin-bottom: 20px;">{{current_vote}}</h2>
-                    <p style="margin: 0px;">{{description}}</p>
-                    <p>{{end}}<br>You are {{revote}} allowed to redo your vote.</p>{{votes|safe}}
+            <div class="row row-cols-1 d-flex justify-content-center align-items-center">
+                <div class="col text-center">
+                    <h2 class="display-3 fw-bold mb-4">Votes are not public until after this vote.</h2>
+                    <p class="fs-4 text-muted">You will be able to verify the votes after the voting has finished</p><a class="btn btn-primary" role="button" href="/">Home</a>
                 </div>
-                <div class="col-md-6 text-center">
-                    <h3>You have&nbsp;<span id="balance">0</span>&nbsp;votes.</h3>
-                    <h4><span id="percent">0</span>% of the voting power.</h4>
-                    <div id="existingVote"></div>
-                    <h5 class="display-5">Vote Here</h5>
-                    <form class="d-flex justify-content-center flex-wrap" id="signMessageForm" data-bs-theme="light">
-                        <div class="mb-3">
-                            <p>Select your vote or split your votes between options.</p>{{options|safe}}
-                        </div>
-                        <div class="mb-3"><button class="btn btn-primary" type="submit" style="margin-top: 25px;" {% if not enabled %}disabled{% endif %}>Vote</button></div>
-                    </form>
-                </div>
-            </div>
-            <div class="col-12 col-lg-10 mx-auto">
-                <div class="text-center position-relative" style="padding-top: 25px;"><a class="btn btn-primary" role="button" target="_blank" href="/votes">View vote proofs</a><img class="img-fluid" src="assets/img/illustrations/meeting.svg" style="width: 800px;"></div>
             </div>
         </div>
     </section>
@@ -98,7 +63,6 @@
         </div>
     </footer>
     <script src="assets/bootstrap/js/bootstrap.min.js"></script>
-    <script src="assets/js/bundle.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="assets/js/startup-modern.js"></script>
 </body>

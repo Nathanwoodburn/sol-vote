@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
-    <title>Vote | Nathan.Woodburn/</title>
+    <title>Admin - Vote | Nathan.Woodburn/</title>
     <meta name="twitter:image" content="https://vote.woodburn.au/assets/img/favicon.png">
     <meta name="twitter:card" content="summary">
     <meta name="twitter:description" content="Vote on Nathan.Woodburn/ projects">
@@ -14,14 +14,6 @@
     <meta property="og:description" content="Vote on Nathan.Woodburn/ projects">
     <meta name="twitter:title" content="Vote | Nathan.Woodburn/">
     <meta property="og:image" content="https://vote.woodburn.au/assets/img/favicon.png">
-    <script type="application/ld+json">
-        {
-            "@context": "http://schema.org",
-            "@type": "WebSite",
-            "name": "Vote | Nathan.Woodburn/",
-            "url": "https://vote.woodburn.au"
-        }
-    </script>
     <link rel="apple-touch-icon" type="image/png" sizes="180x180" href="assets/img/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon-16x16.png">
     <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon-32x32.png">
@@ -43,38 +35,53 @@
             <div class="row pt-5">
                 <div class="col-md-8 text-center text-md-start mx-auto">
                     <div class="text-center">
-                        <h1 class="display-4 fw-bold mb-5">Vote on projects from<br><a class="no-a-display" href="https://nathan.woodburn.au" target="_blank"><span class="underline">Nathan.Woodburn/</span></a></h1>
+                        <h1 class="display-4 fw-bold mb-5">Admin</h1>
+                        <form method="post"><input class="form-control" type="text" name="name" value="{{name}}" placeholder="Vote Name" style="margin-bottom: 5px;"><textarea class="form-control" style="margin-bottom: 5px;" name="description" placeholder="Vote Description">{{description}}</textarea><input class="form-control" type="text" name="options" value="{{options}}" placeholder="Vote Options comma separated" style="margin-bottom: 5px;">
+                            <div style="margin-bottom: 5px;"><label class="form-label" for="end" style="display: inline-block;margin-right: 10px;">End Date</label><input class="form-control" type="date" name="end" value="{{end}}" style="width: auto;display: inline-block;"></div>{% if revote %}
+<div class="form-check form-switch form-check-inline">
+  <input id="formCheck-1" class="form-check-input" type="checkbox" name="revote" checked />
+  <label class="form-check-label" for="formCheck-1">Allow revotes</label>
+</div>
+{% else %}
+<div class="form-check form-switch form-check-inline">
+  <input id="formCheck-1" class="form-check-input" type="checkbox" name="revote" />
+  <label class="form-check-label" for="formCheck-1">Allow revotes</label>
+</div>
+{% endif %}
+{% if public %}
+<div class="form-check form-switch form-check-inline">
+  <input id="formCheck-2" class="form-check-input" type="checkbox" name="public" checked />
+  <label class="form-check-label" for="formCheck-2">Show results during vote</label>
+</div>
+{% else %}
+<div class="form-check form-switch form-check-inline">
+  <input id="formCheck-2" class="form-check-input" type="checkbox" name="public" />
+  <label class="form-check-label" for="formCheck-2">Show results during vote</label>
+</div>
+{% endif %}{% if enabled %}
+<div class="form-check form-switch form-check-inline">
+  <input id="formCheck-3" class="form-check-input" type="checkbox" name="enabled" checked />
+  <label class="form-check-label" for="formCheck-3">Enabled</label>
+</div>
+{% else %}
+<div class="form-check form-switch form-check-inline">
+  <input id="formCheck-3" class="form-check-input" type="checkbox" name="enabled" />
+  <label class="form-check-label" for="formCheck-3">Enabled</label>
+</div>
+{% endif %}<input class="btn btn-primary" type="submit" style="display: block;margin: auto;margin-top: 25px;">
+                        </form>
+                        <div style="margin-top: 40px;">
+                            <h1>Reset Votes</h1>
+                            <p>Clear all votes to allow for the next vote</p><a class="btn btn-primary" role="button" href="/admin/clear">Reset Votes</a>
+                        </div>
                     </div>
+                </div>
+                <div class="col-12 col-lg-10 mx-auto">
+                    <div class="text-center position-relative"></div>
                 </div>
             </div>
         </div>
     </header>
-    <section>
-        <div class="container">
-            <div class="row">
-                <div class="col-md-6 text-center">
-                    <h2 style="margin-bottom: 20px;">{{current_vote}}</h2>
-                    <p style="margin: 0px;">{{description}}</p>
-                    <p>{{end}}<br>You are {{revote}} allowed to redo your vote.</p>{{votes|safe}}
-                </div>
-                <div class="col-md-6 text-center">
-                    <h3>You have&nbsp;<span id="balance">0</span>&nbsp;votes.</h3>
-                    <h4><span id="percent">0</span>% of the voting power.</h4>
-                    <div id="existingVote"></div>
-                    <h5 class="display-5">Vote Here</h5>
-                    <form class="d-flex justify-content-center flex-wrap" id="signMessageForm" data-bs-theme="light">
-                        <div class="mb-3">
-                            <p>Select your vote or split your votes between options.</p>{{options|safe}}
-                        </div>
-                        <div class="mb-3"><button class="btn btn-primary" type="submit" style="margin-top: 25px;" {% if not enabled %}disabled{% endif %}>Vote</button></div>
-                    </form>
-                </div>
-            </div>
-            <div class="col-12 col-lg-10 mx-auto">
-                <div class="text-center position-relative" style="padding-top: 25px;"><a class="btn btn-primary" role="button" target="_blank" href="/votes">View vote proofs</a><img class="img-fluid" src="assets/img/illustrations/meeting.svg" style="width: 800px;"></div>
-            </div>
-        </div>
-    </section>
     <footer>
         <div class="container py-4 py-lg-5">
             <div class="row row-cols-2 row-cols-md-4">
@@ -98,7 +105,6 @@
         </div>
     </footer>
     <script src="assets/bootstrap/js/bootstrap.min.js"></script>
-    <script src="assets/js/bundle.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="assets/js/startup-modern.js"></script>
 </body>

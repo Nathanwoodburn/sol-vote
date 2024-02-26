@@ -4,7 +4,7 @@ import base58 from 'bs58'
 
 document.addEventListener('DOMContentLoaded', async function() {
     // Set testing to true if running in a local environment
-    const testing = false;
+    const testing = true;
     let TOKENID = "G9GQFWQmTiBzm1Hh4gM4ydQB4en3wPUxBZ1PS8DruXy8";
     let supply = 100000;
     let balance = 0;
@@ -18,7 +18,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Initialize Solana connection
     const solana = window.solana;
     if (!solana || !solana.isPhantom) {
-        alert('Phantom wallet not detected. Please install Phantom and try again.');
         return;
     }
 
@@ -89,9 +88,48 @@ document.addEventListener('DOMContentLoaded', async function() {
             document.getElementById('percent').textContent = roundedPercent.toString();
             balance = output;
         });
+
+        // Show the user their existing vote if they have one
+        // Read list of votes from the server
+        const response = await fetch('/votes?walletAddress=' + solana.publicKey.toString());
+        const votes = await response.json();
+        
+        // Find the user's vote
+        const userVote = votes.find(vote => vote.walletAddress === solana.publicKey.toString());
+        if (userVote) {
+            // Display the user's vote
+            const vote = JSON.parse(userVote.message);
+            const existingVote = document.getElementById('existingVote');
+            existingVote.innerHTML = '<h3 class="display-4">Your existing vote:</h3>';
+            let total = 0;
+            for (const key in vote) {
+                if (vote.hasOwnProperty(key)) {
+                    const value = vote[key];
+                    total += parseInt(value);
+                    const li = document.createElement('li');
+                    li.textContent = `${key}: ${value}%`;
+                    // Remove the bullet points
+                    li.style.listStyleType = 'none';
+                    if (parseInt(value) > 0) {
+                        existingVote.appendChild(li);
+                    }
+                }
+            }
+            const sub = document.createElement('p');
+            sub.textContent = `You have used ${total}% of your voting power`;
+            existingVote.appendChild(sub);
+
+            existingVote.style.display = 'block';            
+            existingVote.style.marginBottom = '20px';
+            existingVote.style.backgroundColor = 'black';
+            existingVote.style.color = 'white';
+            existingVote.style.padding = '10px';
+        }
+        
+
+
     } catch (error) {
         console.error('Error connecting wallet:', error);
-        alert('Error connecting wallet. Check the console for details.');
         return;
     }
 
@@ -152,7 +190,6 @@ document.addEventListener('DOMContentLoaded', async function() {
 
         } catch (error) {
             console.error('Error submitting vote:', error);
-            alert('Error submitting vote. Check the console for details.');
         }
     });
 });
