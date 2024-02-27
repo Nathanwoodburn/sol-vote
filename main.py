@@ -374,7 +374,6 @@ def timeLeft():
     info = get_vote_info()
     end = utc_now.strptime(info["end"], "%Y-%m-%d")
     left = end - utc_now
-    print(left)
     return left
 
 def endTime():

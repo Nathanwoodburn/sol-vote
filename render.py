@@ -6,8 +6,6 @@ def votes():
     with open('data/votes.json') as file:
         votes = json.load(file)
 
-    print(votes)
-
     options = {}
     for vote in votes:
         # Check if message is json

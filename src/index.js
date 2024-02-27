@@ -133,8 +133,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         return;
     }
 
-    document.getElementById('signMessageForm').addEventListener('submit', async function(event) {
-        event.preventDefault();
+    async function submitVote() {
         // Get all inputs in #advancedOptions
         const inputs = document.querySelectorAll('#advancedOptions input');
 
@@ -164,8 +163,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             return;
         }
         const vote = JSON.stringify(options);
-
-        // Encode the message as a buffer-like object
+        // Encode the message as a buffer-like object   
         const messageUint8Array = new TextEncoder().encode(vote);
         // Request signature from Phantom
         try {
@@ -176,20 +174,21 @@ document.addEventListener('DOMContentLoaded', async function() {
                     display: "utf8"
                 },
             });
-
             const url = 'http://localhost:5000/vote'; // Update the URL as needed
+            
+            const sigUint8Array = new Uint8Array(signature);
 
             // Convert signature to readable format
-            const sig = base58.encode(signature);
-
-            
+            const sig = base58.encode(sigUint8Array);
             console.log(sig);
-
-
             window.location.href = `/vote?message=${encodeURIComponent(vote)}&signature=${encodeURIComponent(sig)}&walletAddress=${encodeURIComponent(solana.publicKey.toBase58())}&votes=${encodeURIComponent(balance)}&percent=${encodeURIComponent((balance / supply) * 100)}`
 
         } catch (error) {
             console.error('Error submitting vote:', error);
         }
+    }
+    document.getElementById('confirmButton').addEventListener('click', async function() {
+        // You can perform any action here, such as submitting the form
+        await submitVote();
     });
 });
